@@ -1,4 +1,5 @@
 
+// Format tweet text with links
 function formatText(text) {
     var link = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     var user = /@(\w+)/ig;
@@ -16,6 +17,7 @@ function formatText(text) {
     return desc;
 }
 
+// Calculate time since tweet
 function timeSince(date) {
 
     var seconds = Math.floor((new Date() - date) / 1000);
@@ -44,7 +46,7 @@ function timeSince(date) {
     return Math.floor(seconds) + " seconds";
 }
 
-// Class to represent a row in the seat reservations grid
+// Class to represent a tweet
 function Tweet(data) {
     var self = this;
     self.data = data;
@@ -52,8 +54,8 @@ function Tweet(data) {
     self.tweet_url = 'https://twitter.com/'+data.user.screen_name+'/status/'+data.id_str;
 
     self.time_since = ko.computed(function(){
-        var date = new Date(data.created_at)
-        return timeSince(date.getTime());
+        var date = new Date(data.created_at);
+        return timeSince(date.getTime())+' ago';
     }, self);
 
     self.user_url = 'https://twitter.com/'+data.user.screen_name;
@@ -68,50 +70,128 @@ function Tweet(data) {
     }
 }
 
+// Column build class
 function Column(tweets){
     var self = this;
     self.col = tweets;
 }
 
-
+// Business time
 function KoTwitter() {
 
-        // Data
         var self = this;
-        self.numcols = ko.observable(3);
-        self.tweets = ko.observableArray();
-        self.tweetsLength = ko.observable();
-        self.query = ko.observable("weather");
-        self.columns = ko.observableArray();
+        self.tweets = ko.observableArray(); // main tweets array
+
+        // Grid Variables
+        self.numcols = 3; // number of columns to render
+        self.columns = ko.observableArray(); // main columns array
         self.colClass = ko.computed(function(){
+            // calculate grid column width
             return 'col-sm-'+(12/self.numcols());
         }, self);
 
-        self.updateFeed = function() {
+        // Alert Box Variables
+        self.alertText = ko.observable('');
+        self.alertType = ko.observable('success');
+        self.alertClass = ko.computed(function(){
+            return 'alert-'+self.alertType();
+        }, self);
+
+        // Signin Form Variables
+        self.authPin = ko.observable();
+        self.showSignin = ko.observable(true);
+        self.showPinForm = ko.observable(false);
+
+        // Grid columns builder
+        self.buildGrid = function(data) {
+            var statuses = data;
+            for (var i = statuses.length - 1; i >= 0; i--) {
+                self.tweets.push(new Tweet(statuses[i]));
+            }
+            for (var j = self.numcols() - 1; j >= 0; j--) {
+                var offset = self.tweets().length/self.numcols();
+                var begin = j*offset;
+                var end = begin+offset;
+                // splits tweets array into three columns
+                self.columns.push(new Column(self.tweets.slice(begin, end)));
+
+                // TODO: split tweets so they render in order.
+                // e.g tweet 1 would go in column 1, tweet 2
+                // would go in column 2, tweet 3 would go in
+                // column3... tweet 4 would go in column 1.
+                // etc etc.
+            }
+        };
+
+        // Signin
+        self.signIn = function() {
+            self.showSignin(false);
+            self.showPinForm(true);
+            self.alertText('<strong>Signing In:</strong> Please authorize and copy your authorization PIN here and submit.');
+
+            // get authorization requst token
+            cb.__call(
+                "oauth_requestToken",
+                {oauth_callback: "oob"},
+                function (reply) {
+                    console.log(reply);
+                    // set request token
+                    cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+                    // get the authorize screen URL and load window
+                    cb.__call(
+                        "oauth_authorize",
+                        {},
+                        function (auth_url) {
+                            window.codebird_auth = window.open(auth_url);
+                        }
+                    );
+                }
+            );
+        };
+
+        // Get authorization token
+        self.authorize = function() {
+            self.showPinForm(false);
+            self.alertText('<strong>Processing</strong>: Autorizing app...');
+            cb.__call(
+                "oauth_accessToken",
+                {oauth_verifier: self.authPin()},
+                function (reply) {
+                    // TODO: authorization error fallback
+
+                    // set authorization token
+                    cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+                    // update alert
+                    self.alertText('<strong>Success!</strong>: Loading tweets...');
+
+                    // load tweets
+                    self.loadHomeTimeline();
+                }
+            );
+        };
+
+
+        // Load user home timeline
+        self.loadHomeTimeline = function() {
+
+            // reset columns and tweets
             self.tweets().length = 0;
             self.columns().length = 0;
-            // var statuses = sampleData;
-            var queryString = "q="+encodeURIComponent(self.query())+"&amp;geocode=45.52000,-122.68194,10mi";
+
             cb.__call(
-                "search_tweets",
-                queryString,
+                "statuses_homeTimeline",
+                {},
                 function (reply) {
-                    var statuses = reply.statuses;
-                    for (var i = statuses.length - 1; i >= 0; i--) {
-                        self.tweets.push(new Tweet(statuses[i]));
-                    }
-                    for (var j = self.numcols() - 1; j >= 0; j--) {
-                        var offset = self.tweets().length/self.numcols();
-                        var begin = j*offset;
-                        var end = begin+offset;
-                        self.columns.push(new Column(self.tweets.slice(begin, end)));
-                    }
-                },
-                true // this parameter required
+                    self.alertText('');
+
+                    // build grid
+                    self.buildGrid(reply);
+                }
             );
 
         };
-        self.updateFeed();
 
 }
 
