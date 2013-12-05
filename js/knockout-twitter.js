@@ -1573,7 +1573,10 @@ function Tweet(data) {
         return timeSince(date.getTime())+' ago';
     }, self);
 
+    self.screen_name = data.user.screen_name;
+
     self.user_url = 'https://twitter.com/'+data.user.screen_name;
+
 
     self.formattedText = formatText(data.text);
 
@@ -1602,7 +1605,7 @@ function KoTwitter() {
         self.columns = ko.observableArray(); // main columns array
         self.colClass = ko.computed(function(){
             // calculate grid column width
-            return 'col-sm-'+(12/self.numcols());
+            return 'col-sm-'+(12/self.numcols);
         }, self);
 
         // Alert Box Variables
@@ -1623,8 +1626,8 @@ function KoTwitter() {
             for (var i = statuses.length - 1; i >= 0; i--) {
                 self.tweets.push(new Tweet(statuses[i]));
             }
-            for (var j = self.numcols() - 1; j >= 0; j--) {
-                var offset = self.tweets().length/self.numcols();
+            for (var j = self.numcols - 1; j >= 0; j--) {
+                var offset = self.tweets().length/self.numcols;
                 var begin = j*offset;
                 var end = begin+offset;
                 // splits tweets array into three columns
@@ -1642,7 +1645,7 @@ function KoTwitter() {
         self.signIn = function() {
             self.showSignin(false);
             self.showPinForm(true);
-            self.alertText('<strong>Signing In:</strong> Please authorize and copy your authorization PIN here and submit.');
+            self.alertText('<strong>Authorization:</strong> Please authorize and enter your authorization PIN below and submit.');
 
             // get authorization requst token
             cb.__call(
