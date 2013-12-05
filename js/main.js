@@ -1,6 +1,3 @@
-var cb = new Codebird();
-cb.setConsumerKey("y0OeT5rPbsxo2p3lhsOyg", "3eYjLFICByV3rZ7CVp5EratWEEyweR4RtMMChtRAfVc");
-cb.setToken("247938477-ao3dSRQqSxwGVHkiyG9BKZKCNOclD5i325xwYy16", "Z7NCP0bRK9j26xD5BaHy5QdIRWaFzYl4xWhjbS51TOG6x");
 
 function formatText(text) {
     var link = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;

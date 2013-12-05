@@ -23,7 +23,7 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ["js/vendor/concat/*.js", "js/main.js"],
+        src: ["js/vendor/*.js", "js/main.js"],
         dest: "js/<%= pkg.name %>.js"
       }
     },
