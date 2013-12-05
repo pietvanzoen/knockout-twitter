@@ -2279,6 +2279,17 @@ img {
   max-width: 100%;
   height: auto;
 }
+.profile-img {
+  float: left;
+  margin-right: 15px;
+  display: inline-block;
+}
+.tweet-meta {
+  display: inline-block;
+}
+.tweet-meta a {
+  display: block;
+}
 .footer {
   padding: 2em 0;
 }
