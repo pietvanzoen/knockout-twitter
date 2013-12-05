@@ -87,7 +87,7 @@ function KoTwitter() {
         self.columns = ko.observableArray(); // main columns array
         self.colClass = ko.computed(function(){
             // calculate grid column width
-            return 'col-sm-'+(12/self.numcols());
+            return 'col-sm-'+(12/self.numcols);
         }, self);
 
         // Alert Box Variables
@@ -108,8 +108,8 @@ function KoTwitter() {
             for (var i = statuses.length - 1; i >= 0; i--) {
                 self.tweets.push(new Tweet(statuses[i]));
             }
-            for (var j = self.numcols() - 1; j >= 0; j--) {
-                var offset = self.tweets().length/self.numcols();
+            for (var j = self.numcols - 1; j >= 0; j--) {
+                var offset = self.tweets().length/self.numcols;
                 var begin = j*offset;
                 var end = begin+offset;
                 // splits tweets array into three columns
