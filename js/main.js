@@ -130,7 +130,7 @@ function KoTwitter() {
         self.signIn = function() {
             self.showSignin(false);
             self.showPinForm(true);
-            self.alertText('<strong>Signing In:</strong> Please authorize and copy your authorization PIN here and submit.');
+            self.alertText('<strong>Authorization:</strong> Please authorize and enter your authorization PIN below and submit.');
 
             // get authorization requst token
             cb.__call(
