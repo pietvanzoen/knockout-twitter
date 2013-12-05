@@ -58,7 +58,10 @@ function Tweet(data) {
         return timeSince(date.getTime())+' ago';
     }, self);
 
+    self.screen_name = data.user.screen_name;
+
     self.user_url = 'https://twitter.com/'+data.user.screen_name;
+
 
     self.formattedText = formatText(data.text);
 
